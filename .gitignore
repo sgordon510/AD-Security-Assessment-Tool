@@ -1,0 +1,25 @@
+# Data files (sensitive)
+data/
+*.json
+!package.json
+
+# Reports
+reports/
+
+# Bun
+node_modules/
+bun.lockb
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

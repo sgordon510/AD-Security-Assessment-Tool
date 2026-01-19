@@ -1,0 +1,23 @@
+{
+  "name": "ad-security-assessment-tool",
+  "version": "2.0.0",
+  "description": "Comprehensive AD/Azure AD security assessment tool for Windows 11",
+  "author": "sgordon510",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "assess": "bun run Tools/RunFullAssessment.ts",
+    "assess:ad": "bun run Tools/AssessADMisconfigs.ts",
+    "assess:privileges": "bun run Tools/AnalyzePrivileges.ts",
+    "assess:azure": "bun run Tools/AuditAzureAD.ts",
+    "parse:bloodhound": "bun run Tools/ParseBloodHound.ts",
+    "parse:pingcastle": "bun run Tools/ParsePingCastle.ts",
+    "report": "bun run Tools/GenerateExecutiveReport.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

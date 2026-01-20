@@ -77,12 +77,171 @@ C:\SecurityAssessment\
 
 ---
 
+## BloodHound Integration
+
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) is a tool for analyzing Active Directory attack paths. This assessment tool can parse BloodHound data to identify privilege escalation risks.
+
+### Step 1: Download BloodHound & SharpHound
+
+1. Download BloodHound from the [official releases](https://github.com/BloodHoundAD/BloodHound/releases)
+2. Download SharpHound (the data collector) from [BloodHound releases](https://github.com/BloodHoundAD/SharpHound/releases)
+3. Extract both to a folder (e.g., `C:\BloodHound\`)
+
+### Step 2: Run SharpHound to Collect Data
+
+On a domain-joined machine **as a Domain User** (Domain Admin not required):
+
+```powershell
+# Basic collection (recommended)
+.\SharpHound.exe -c All
+
+# Or with specific output folder
+.\SharpHound.exe -c All --outputdirectory C:\BloodHound\Data
+
+# Stealth mode (slower but less detectable)
+.\SharpHound.exe -c All --stealth
+```
+
+SharpHound creates a ZIP file containing JSON files:
+```
+20240115120000_BloodHound.zip
+├── 20240115120000_users.json
+├── 20240115120000_computers.json
+├── 20240115120000_groups.json
+├── 20240115120000_domains.json
+└── 20240115120000_gpos.json
+```
+
+### Step 3: Extract and Use with Assessment Tool
+
+```powershell
+# Extract the SharpHound ZIP
+Expand-Archive -Path "20240115120000_BloodHound.zip" -DestinationPath "C:\BloodHound\Data"
+
+# Run assessment with BloodHound data
+.\Run-Assessment.ps1 -OrgName "Your Company" -BloodHoundPath "C:\BloodHound\Data"
+```
+
+### What BloodHound Analysis Detects
+
+| Finding | Severity | Description |
+|---------|----------|-------------|
+| Kerberoastable Accounts | CRITICAL/MEDIUM | Service accounts with SPNs vulnerable to offline cracking |
+| AS-REP Roastable Accounts | CRITICAL | Accounts without Kerberos pre-auth |
+| Unconstrained Delegation | HIGH | Computers that can impersonate any user |
+| LAPS Coverage Gaps | HIGH/MEDIUM | Computers without local admin password management |
+| Dangerous AD Permissions | HIGH | GenericAll, WriteDacl, etc. on sensitive objects |
+| Dormant Admin Accounts | HIGH | Privileged accounts inactive for 90+ days |
+| Large Privileged Groups | MEDIUM | Groups with excessive membership |
+
+---
+
+## PingCastle Integration
+
+[PingCastle](https://www.pingcastle.com/) is a comprehensive AD security assessment tool that produces a risk score. This tool can parse PingCastle reports to include findings in the executive dashboard.
+
+### Step 1: Download PingCastle
+
+1. Download from [pingcastle.com/download](https://www.pingcastle.com/download/)
+2. Extract to a folder (e.g., `C:\PingCastle\`)
+
+PingCastle is free for basic use. Enterprise features require a license.
+
+### Step 2: Run PingCastle Health Check
+
+On a domain-joined machine **as a Domain Admin**:
+
+```powershell
+cd C:\PingCastle
+
+# Basic health check (auto-detects domain)
+.\PingCastle.exe --healthcheck
+
+# Specify domain explicitly
+.\PingCastle.exe --healthcheck --server contoso.com
+
+# Generate XML report (recommended for parsing)
+.\PingCastle.exe --healthcheck --server contoso.com --level Full
+```
+
+PingCastle creates reports in the current directory:
+```
+ad_hc_contoso.com.html    # Human-readable HTML report
+ad_hc_contoso.com.xml     # Machine-readable XML report (preferred)
+```
+
+### Step 3: Use with Assessment Tool
+
+```powershell
+# Using XML report (recommended - more detailed parsing)
+.\Run-Assessment.ps1 -OrgName "Your Company" -PingCastlePath "C:\PingCastle\ad_hc_contoso.com.xml"
+
+# Using HTML report (also supported)
+.\Run-Assessment.ps1 -OrgName "Your Company" -PingCastlePath "C:\PingCastle\ad_hc_contoso.com.html"
+```
+
+### PingCastle Risk Score Mapping
+
+| PingCastle Points | This Tool's Severity |
+|-------------------|---------------------|
+| 50+ points | CRITICAL |
+| 30-49 points | HIGH |
+| 15-29 points | MEDIUM |
+| 5-14 points | LOW |
+| <5 points | INFO |
+
+### What PingCastle Detects
+
+PingCastle analyzes 100+ security rules across categories:
+- **Stale Objects**: Dormant accounts, old computers, expired passwords
+- **Privileged Accounts**: Excessive admins, service accounts, delegation issues
+- **Trusts**: External trust risks, SID history abuse
+- **Anomalies**: AdminSDHolder, schema modifications, GPO issues
+- **Vulnerabilities**: Missing patches, weak protocols, certificate issues
+
+---
+
+## Full Assessment Example
+
+Run a comprehensive assessment with all data sources:
+
+```powershell
+# 1. Collect AD data
+.\Run-Assessment.ps1 -OrgName "Contoso Inc" -CollectData
+
+# 2. Run SharpHound separately (as regular domain user)
+cd C:\BloodHound
+.\SharpHound.exe -c All --outputdirectory C:\BloodHound\Data
+
+# 3. Run PingCastle separately (as Domain Admin)
+cd C:\PingCastle
+.\PingCastle.exe --healthcheck
+
+# 4. Run full assessment with all data sources
+cd C:\SecurityAssessment
+.\Run-Assessment.ps1 -OrgName "Contoso Inc" `
+    -CollectData `
+    -IncludeAzure `
+    -BloodHoundPath "C:\BloodHound\Data" `
+    -PingCastlePath "C:\PingCastle\ad_hc_contoso.com.xml"
+```
+
+---
+
 ## Requirements
 
 - Windows 10/11 or Windows Server 2016+
 - PowerShell 5.1+
 - Domain Admin permissions (for data collection)
 - Bun runtime (installed by Setup.ps1)
+
+### Optional Tool Requirements
+
+| Tool | Required Permissions | Download |
+|------|---------------------|----------|
+| **SharpHound** | Domain User (minimum) | [GitHub Releases](https://github.com/BloodHoundAD/SharpHound/releases) |
+| **PingCastle** | Domain Admin (recommended) | [pingcastle.com](https://www.pingcastle.com/download/) |
+| **Azure AD** | Global Reader role | Built-in (Microsoft Graph) |
 
 ---
 
@@ -125,6 +284,12 @@ $env:HTTPS_PROXY = "http://proxy-server:port"
 ---
 
 ## Version
+
+**v2.0.2** - Documentation Update
+- Added comprehensive BloodHound integration guide
+- Added comprehensive PingCastle integration guide
+- Added full assessment example with all data sources
+- Added optional tool requirements table
 
 **v2.0.1** - Bug Fixes
 - Fixed Microsoft Graph connection issues

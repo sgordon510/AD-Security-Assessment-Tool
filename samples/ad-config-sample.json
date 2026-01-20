@@ -1,0 +1,86 @@
+{
+  "collectionDate": "2024-01-15 10:00:00",
+  "domain": {
+    "name": "contoso.com",
+    "netbiosName": "CONTOSO",
+    "forestName": "contoso.com",
+    "domainMode": "Windows2016Domain",
+    "forestMode": "Windows2016Forest"
+  },
+  "passwordPolicy": {
+    "minPasswordLength": 8,
+    "passwordHistoryCount": 12,
+    "maxPasswordAge": 90,
+    "minPasswordAge": 1,
+    "complexityEnabled": true,
+    "reversibleEncryptionEnabled": false,
+    "lockoutThreshold": 5,
+    "lockoutDuration": 30,
+    "lockoutObservationWindow": 30
+  },
+  "fineGrainedPasswordPolicies": [
+    {
+      "name": "Admins Password Policy",
+      "precedence": 10,
+      "minPasswordLength": 14,
+      "appliesTo": ["Domain Admins", "Enterprise Admins"]
+    }
+  ],
+  "ldapSettings": {
+    "ldapSigningRequired": false,
+    "ldapChannelBindingRequired": false
+  },
+  "domainControllers": [
+    {
+      "name": "DC01",
+      "ipAddress": "192.168.1.10",
+      "osVersion": "Windows Server 2019",
+      "isGlobalCatalog": true,
+      "siteName": "Default-First-Site-Name"
+    },
+    {
+      "name": "DC02",
+      "ipAddress": "192.168.1.11",
+      "osVersion": "Windows Server 2012 R2",
+      "isGlobalCatalog": true,
+      "siteName": "Default-First-Site-Name"
+    }
+  ],
+  "serviceAccounts": [
+    {
+      "samAccountName": "svc_sql",
+      "displayName": "SQL Service Account",
+      "description": "Service account for SQL Server",
+      "passwordLastSet": "2022-01-15T00:00:00Z",
+      "servicePrincipalNames": ["MSSQLSvc/sql01.contoso.com:1433"],
+      "enabled": true,
+      "passwordNeverExpires": true
+    },
+    {
+      "samAccountName": "svc_backup",
+      "displayName": "Backup Service Account",
+      "description": "Service account for backup software",
+      "passwordLastSet": "2023-06-01T00:00:00Z",
+      "servicePrincipalNames": ["backup/backup01.contoso.com"],
+      "enabled": true,
+      "passwordNeverExpires": true
+    },
+    {
+      "samAccountName": "svc_web",
+      "displayName": "Web Application Service",
+      "description": "IIS application pool identity",
+      "passwordLastSet": "2021-03-10T00:00:00Z",
+      "servicePrincipalNames": ["HTTP/web01.contoso.com"],
+      "enabled": true,
+      "passwordNeverExpires": true
+    }
+  ],
+  "trusts": [
+    {
+      "name": "partner.com",
+      "direction": "Bidirectional",
+      "trustType": "External",
+      "sidFilteringEnabled": true
+    }
+  ]
+}

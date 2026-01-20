@@ -1,0 +1,144 @@
+{
+  "collectionDate": "2024-01-15 10:00:00",
+  "privilegedGroups": [
+    {
+      "name": "Domain Admins",
+      "distinguishedName": "CN=Domain Admins,CN=Users,DC=contoso,DC=com",
+      "members": [
+        {
+          "samAccountName": "Administrator",
+          "displayName": "Built-in Administrator",
+          "enabled": true,
+          "lastLogon": "2024-01-14T08:00:00Z",
+          "passwordLastSet": "2023-01-01T00:00:00Z"
+        },
+        {
+          "samAccountName": "jdoe.admin",
+          "displayName": "John Doe (Admin)",
+          "enabled": true,
+          "lastLogon": "2024-01-14T09:00:00Z",
+          "passwordLastSet": "2023-12-01T00:00:00Z"
+        },
+        {
+          "samAccountName": "old.admin",
+          "displayName": "Old Admin Account",
+          "enabled": true,
+          "lastLogon": "2023-03-15T00:00:00Z",
+          "passwordLastSet": "2022-06-01T00:00:00Z"
+        }
+      ],
+      "memberCount": 3
+    },
+    {
+      "name": "Enterprise Admins",
+      "distinguishedName": "CN=Enterprise Admins,CN=Users,DC=contoso,DC=com",
+      "members": [
+        {
+          "samAccountName": "Administrator",
+          "displayName": "Built-in Administrator",
+          "enabled": true,
+          "lastLogon": "2024-01-14T08:00:00Z",
+          "passwordLastSet": "2023-01-01T00:00:00Z"
+        }
+      ],
+      "memberCount": 1
+    },
+    {
+      "name": "Schema Admins",
+      "distinguishedName": "CN=Schema Admins,CN=Users,DC=contoso,DC=com",
+      "members": [
+        {
+          "samAccountName": "Administrator",
+          "displayName": "Built-in Administrator",
+          "enabled": true,
+          "lastLogon": "2024-01-14T08:00:00Z",
+          "passwordLastSet": "2023-01-01T00:00:00Z"
+        }
+      ],
+      "memberCount": 1
+    },
+    {
+      "name": "Administrators",
+      "distinguishedName": "CN=Administrators,CN=Builtin,DC=contoso,DC=com",
+      "members": [
+        {
+          "samAccountName": "Administrator",
+          "displayName": "Built-in Administrator",
+          "enabled": true
+        },
+        {
+          "samAccountName": "Domain Admins",
+          "displayName": "Domain Admins (Group)",
+          "enabled": true
+        }
+      ],
+      "memberCount": 2
+    }
+  ],
+  "kerberoastableUsers": [
+    {
+      "samAccountName": "svc_sql",
+      "displayName": "SQL Service Account",
+      "servicePrincipalNames": ["MSSQLSvc/sql01.contoso.com:1433"],
+      "enabled": true,
+      "passwordLastSet": "2022-01-15T00:00:00Z",
+      "memberOf": ["Domain Users"]
+    },
+    {
+      "samAccountName": "svc_backup",
+      "displayName": "Backup Service Account",
+      "servicePrincipalNames": ["backup/backup01.contoso.com"],
+      "enabled": true,
+      "passwordLastSet": "2023-06-01T00:00:00Z",
+      "memberOf": ["Backup Operators"]
+    },
+    {
+      "samAccountName": "admin.with.spn",
+      "displayName": "Admin with SPN",
+      "servicePrincipalNames": ["HTTP/admin.contoso.com"],
+      "enabled": true,
+      "passwordLastSet": "2023-09-01T00:00:00Z",
+      "memberOf": ["Domain Admins"]
+    }
+  ],
+  "asrepRoastableUsers": [
+    {
+      "samAccountName": "legacy.app",
+      "displayName": "Legacy Application Account",
+      "enabled": true,
+      "userAccountControl": 4194304,
+      "passwordLastSet": "2021-01-01T00:00:00Z"
+    }
+  ],
+  "usersWithDCSync": [
+    {
+      "samAccountName": "Administrator",
+      "displayName": "Built-in Administrator",
+      "hasReplicatingChanges": true,
+      "hasReplicatingChangesAll": true
+    },
+    {
+      "samAccountName": "MSOL_abc123",
+      "displayName": "Azure AD Connect Service Account",
+      "hasReplicatingChanges": true,
+      "hasReplicatingChangesAll": true
+    }
+  ],
+  "adminSDHolderProtected": [
+    "Administrator",
+    "krbtgt",
+    "Domain Admins",
+    "Enterprise Admins",
+    "jdoe.admin"
+  ],
+  "statistics": {
+    "totalUsers": 150,
+    "enabledUsers": 142,
+    "disabledUsers": 8,
+    "totalComputers": 75,
+    "totalGroups": 45,
+    "privilegedUsers": 5,
+    "serviceAccounts": 12,
+    "staleAccounts": 15
+  }
+}

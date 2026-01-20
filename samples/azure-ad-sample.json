@@ -1,0 +1,195 @@
+{
+  "collectionDate": "2024-01-15 10:30:00",
+  "tenantId": "12345678-1234-1234-1234-123456789012",
+  "users": [
+    {
+      "userPrincipalName": "admin@contoso.com",
+      "displayName": "Global Admin",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "enabled",
+      "lastSignIn": "2024-01-14T08:00:00Z",
+      "createdDateTime": "2020-01-01T00:00:00Z",
+      "assignedRoles": ["Global Administrator"],
+      "hasLicense": true
+    },
+    {
+      "userPrincipalName": "security.admin@contoso.com",
+      "displayName": "Security Administrator",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "disabled",
+      "lastSignIn": "2024-01-10T14:30:00Z",
+      "createdDateTime": "2021-06-15T00:00:00Z",
+      "assignedRoles": ["Security Administrator"],
+      "hasLicense": true
+    },
+    {
+      "userPrincipalName": "jdoe@contoso.com",
+      "displayName": "John Doe",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "enabled",
+      "lastSignIn": "2024-01-14T09:15:00Z",
+      "createdDateTime": "2022-03-01T00:00:00Z",
+      "assignedRoles": [],
+      "hasLicense": true
+    },
+    {
+      "userPrincipalName": "jsmith@contoso.com",
+      "displayName": "Jane Smith",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "disabled",
+      "lastSignIn": "2024-01-13T16:45:00Z",
+      "createdDateTime": "2022-05-10T00:00:00Z",
+      "assignedRoles": [],
+      "hasLicense": true
+    },
+    {
+      "userPrincipalName": "bob.wilson@contoso.com",
+      "displayName": "Bob Wilson",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "disabled",
+      "lastSignIn": "2024-01-12T11:00:00Z",
+      "createdDateTime": "2023-01-20T00:00:00Z",
+      "assignedRoles": [],
+      "hasLicense": true
+    },
+    {
+      "userPrincipalName": "alice.jones@contoso.com",
+      "displayName": "Alice Jones",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "enabled",
+      "lastSignIn": "2024-01-14T07:30:00Z",
+      "createdDateTime": "2021-09-05T00:00:00Z",
+      "assignedRoles": ["User Administrator"],
+      "hasLicense": true
+    },
+    {
+      "userPrincipalName": "dormant.admin@contoso.com",
+      "displayName": "Dormant Admin Account",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "disabled",
+      "lastSignIn": "2023-06-01T00:00:00Z",
+      "createdDateTime": "2020-05-01T00:00:00Z",
+      "assignedRoles": ["Exchange Administrator"],
+      "hasLicense": true
+    },
+    {
+      "userPrincipalName": "guest.vendor@external.com",
+      "displayName": "Vendor Contact",
+      "userType": "Guest",
+      "accountEnabled": true,
+      "mfaStatus": "disabled",
+      "lastSignIn": "2023-03-15T00:00:00Z",
+      "createdDateTime": "2022-01-10T00:00:00Z",
+      "assignedRoles": [],
+      "hasLicense": false
+    },
+    {
+      "userPrincipalName": "consultant@partner.com",
+      "displayName": "External Consultant",
+      "userType": "Guest",
+      "accountEnabled": true,
+      "mfaStatus": "disabled",
+      "lastSignIn": "2024-01-10T00:00:00Z",
+      "createdDateTime": "2023-06-01T00:00:00Z",
+      "assignedRoles": [],
+      "hasLicense": false
+    },
+    {
+      "userPrincipalName": "service.account@contoso.com",
+      "displayName": "Service Account",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "disabled",
+      "lastSignIn": null,
+      "createdDateTime": "2021-01-01T00:00:00Z",
+      "assignedRoles": [],
+      "hasLicense": false
+    }
+  ],
+  "conditionalAccessPolicies": [
+    {
+      "name": "Require MFA for Admins",
+      "state": "enabled",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeUsers": []
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        }
+      },
+      "grantControls": {
+        "builtInControls": ["mfa"]
+      }
+    },
+    {
+      "name": "Block Legacy Authentication",
+      "state": "enabledForReportingButNotEnforced",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeUsers": []
+        }
+      },
+      "grantControls": {
+        "builtInControls": ["block"]
+      }
+    },
+    {
+      "name": "Require Compliant Device",
+      "state": "disabled",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeUsers": []
+        }
+      },
+      "grantControls": {
+        "builtInControls": ["compliantDevice"]
+      }
+    }
+  ],
+  "pimConfiguration": [
+    {
+      "roleName": "Global Administrator",
+      "activeAssignments": 2,
+      "eligibleAssignments": 1,
+      "maxActivationDuration": 8,
+      "requireJustification": true,
+      "requireMFA": true,
+      "requireApproval": false
+    },
+    {
+      "roleName": "Security Administrator",
+      "activeAssignments": 3,
+      "eligibleAssignments": 0,
+      "maxActivationDuration": 12,
+      "requireJustification": false,
+      "requireMFA": false,
+      "requireApproval": false
+    },
+    {
+      "roleName": "User Administrator",
+      "activeAssignments": 2,
+      "eligibleAssignments": 0,
+      "maxActivationDuration": 24,
+      "requireJustification": false,
+      "requireMFA": true,
+      "requireApproval": false
+    }
+  ],
+  "securityDefaults": false,
+  "legacyAuthEnabled": true,
+  "passwordProtection": {
+    "customBannedPasswords": [],
+    "enabledOnPremises": false
+  }
+}

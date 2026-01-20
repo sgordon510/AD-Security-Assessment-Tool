@@ -77,6 +77,105 @@ C:\SecurityAssessment\
 
 ---
 
+## Demo Mode: Using Sample Data
+
+If you want to test the dashboard without connecting to a real environment, use the included sample data files:
+
+```powershell
+# Copy sample data to the data directory
+Copy-Item .\samples\*.json .\data\
+
+# Run assessment with sample data
+.\Run-Assessment.ps1 -OrgName "Demo Company"
+```
+
+The `samples/` directory contains:
+- `ad-config-sample.json` - Sample AD configuration (password policy, DCs, service accounts)
+- `ad-identity-sample.json` - Sample identity data (privileged groups, Kerberoastable users)
+- `azure-ad-sample.json` - Sample Azure AD data (users, MFA status, Conditional Access)
+
+---
+
+## Manual Data Collection (When Scripts Fail)
+
+If the automated collection scripts fail (e.g., authentication issues, permission problems), you can manually create the data files.
+
+### Option 1: Export from Azure Portal
+
+1. **Go to Azure Portal** > Azure Active Directory
+2. **Users**: Export user list from Users > All Users > Download users
+3. **Conditional Access**: Note policy names and states from Security > Conditional Access
+4. **PIM**: Check role assignments in Privileged Identity Management
+
+Then create `data/azure-ad.json` using this template:
+
+```json
+{
+  "collectionDate": "2024-01-15 10:00:00",
+  "tenantId": "your-tenant-id",
+  "users": [
+    {
+      "userPrincipalName": "user@company.com",
+      "displayName": "User Name",
+      "userType": "Member",
+      "accountEnabled": true,
+      "mfaStatus": "enabled",
+      "lastSignIn": "2024-01-14T08:00:00Z",
+      "assignedRoles": ["Global Administrator"],
+      "hasLicense": true
+    }
+  ],
+  "conditionalAccessPolicies": [
+    {
+      "name": "Policy Name",
+      "state": "enabled",
+      "grantControls": { "builtInControls": ["mfa"] }
+    }
+  ],
+  "pimConfiguration": [
+    {
+      "roleName": "Global Administrator",
+      "activeAssignments": 2,
+      "eligibleAssignments": 1
+    }
+  ],
+  "securityDefaults": false,
+  "legacyAuthEnabled": false
+}
+```
+
+### Option 2: Export from AD PowerShell
+
+Run these commands on a Domain Controller or with RSAT installed:
+
+```powershell
+# Get password policy
+Get-ADDefaultDomainPasswordPolicy | ConvertTo-Json > password-policy.json
+
+# Get privileged group members
+Get-ADGroupMember "Domain Admins" | Select Name,SamAccountName | ConvertTo-Json
+
+# Get service accounts with SPNs (Kerberoastable)
+Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName |
+    Select Name,SamAccountName,ServicePrincipalName | ConvertTo-Json
+
+# Get users without Kerberos pre-auth (AS-REP Roastable)
+Get-ADUser -Filter {DoesNotRequirePreAuth -eq $true} | Select Name,SamAccountName
+```
+
+Then format the output into `data/ad-config.json` and `data/ad-identity.json` using the sample files as templates.
+
+### Option 3: Use Microsoft Graph Explorer
+
+1. Go to [Microsoft Graph Explorer](https://developer.microsoft.com/en-us/graph/graph-explorer)
+2. Sign in with your Azure AD account
+3. Run these queries:
+   - Users: `GET /users?$select=displayName,userPrincipalName,accountEnabled,userType`
+   - Conditional Access: `GET /identity/conditionalAccess/policies`
+4. Copy the JSON responses and format into `data/azure-ad.json`
+
+---
+
 ## BloodHound Integration
 
 [BloodHound](https://github.com/BloodHoundAD/BloodHound) is a tool for analyzing Active Directory attack paths. This assessment tool can parse BloodHound data to identify privilege escalation risks.
@@ -284,6 +383,11 @@ $env:HTTPS_PROXY = "http://proxy-server:port"
 ---
 
 ## Version
+
+**v2.0.3** - Sample Data & Manual Collection
+- Added sample data files for demo/testing without live environment
+- Added manual data collection instructions (Azure Portal, AD PowerShell, Graph Explorer)
+- Added demo mode documentation
 
 **v2.0.2** - Documentation Update
 - Added comprehensive BloodHound integration guide

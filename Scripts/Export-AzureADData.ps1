@@ -13,8 +13,8 @@ $ErrorActionPreference = "Stop"
 # Force TLS 1.2 for older PowerShell versions
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# Disable Web Account Manager (WAM) - fixes hidden authentication window issue on Windows
-$env:MSAL_DISABLE_WAM = "true"
+# Note: If WAM auth window is hidden, set $env:MSAL_DISABLE_WAM = "true" before running
+# Or pre-authenticate with: Connect-MgGraph -Scopes "User.Read.All"
 
 Write-Host "`n=== Azure AD Security Assessment Data Export ===" -ForegroundColor Cyan
 Write-Host "Output: $OutputPath`n" -ForegroundColor Yellow

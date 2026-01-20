@@ -86,7 +86,51 @@ C:\SecurityAssessment\
 
 ---
 
+## Troubleshooting
+
+### Microsoft Graph Connection Fails
+
+If you see "Failed to connect to Microsoft Graph" when running Azure AD collection:
+
+**Option 1: Use Device Code Authentication**
+```powershell
+# Run with device code flow (no browser popup required)
+.\Run-Assessment.ps1 -OrgName "Your Company" -CollectData -IncludeAzure -UseDeviceCode
+
+# Or run the Azure export directly
+.\Scripts\Export-AzureADData.ps1 -UseDeviceCode
+```
+
+**Option 2: Manual Module Installation**
+```powershell
+# Install Microsoft Graph modules as Administrator
+Install-Module Microsoft.Graph -Scope AllUsers -Force -AllowClobber
+
+# Test connection manually
+Connect-MgGraph -Scopes "User.Read.All"
+```
+
+**Option 3: Check Permissions**
+- You need **Global Reader** or higher role in Azure AD
+- Your organization may require admin consent for the Graph API scopes
+- Contact your Azure AD administrator if you see "consent required" errors
+
+**Option 4: Proxy Configuration**
+```powershell
+# If behind a corporate proxy
+$env:HTTPS_PROXY = "http://proxy-server:port"
+.\Scripts\Export-AzureADData.ps1
+```
+
+---
+
 ## Version
+
+**v2.0.1** - Bug Fixes
+- Fixed Microsoft Graph connection issues
+- Added device code authentication option (-UseDeviceCode)
+- Better error messages and troubleshooting guidance
+- Auto-install missing Graph sub-modules
 
 **v2.0.0** - Windows 11 Optimized Package
 - Flattened directory structure

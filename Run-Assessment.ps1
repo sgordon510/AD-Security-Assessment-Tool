@@ -8,6 +8,7 @@ param(
     [switch]$CollectData,
     [switch]$IncludeAzure,
     [switch]$IncludeACLs,
+    [switch]$UseDeviceCode,
     [string]$BloodHoundPath = "",
     [string]$PingCastlePath = "",
     [switch]$Help
@@ -33,6 +34,7 @@ OPTIONS:
     -CollectData            Run data collection before assessment
     -IncludeAzure           Include Azure AD data collection
     -IncludeACLs            Include ACL analysis (slower)
+    -UseDeviceCode          Use device code auth for Azure AD (when browser popup fails)
     -BloodHoundPath <string> Path to BloodHound JSON files
     -PingCastlePath <string> Path to PingCastle XML report
     -Help                   Show this help message
@@ -40,6 +42,7 @@ OPTIONS:
 EXAMPLES:
     .\Run-Assessment.ps1 -OrgName "Contoso Inc"
     .\Run-Assessment.ps1 -OrgName "Contoso Inc" -CollectData -IncludeAzure
+    .\Run-Assessment.ps1 -OrgName "Contoso Inc" -CollectData -IncludeAzure -UseDeviceCode
     .\Run-Assessment.ps1 -OrgName "Contoso Inc" -BloodHoundPath ".\data\bloodhound"
 
 "@
@@ -105,10 +108,15 @@ function Invoke-DataCollection {
 
         if (Test-Path $azureScript) {
             try {
-                & $azureScript -OutputPath $DataPath
+                if ($UseDeviceCode) {
+                    & $azureScript -OutputPath $DataPath -UseDeviceCode
+                } else {
+                    & $azureScript -OutputPath $DataPath
+                }
                 Write-Step "Azure AD data collection complete" "SUCCESS"
             } catch {
                 Write-Step "Azure AD data collection failed: $($_.Exception.Message)" "WARNING"
+                Write-Step "TIP: If authentication failed, try running with -UseDeviceCode flag" "INFO"
             }
         }
     }

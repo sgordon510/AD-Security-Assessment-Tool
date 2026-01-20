@@ -3,38 +3,137 @@
 # Requires: Microsoft Graph PowerShell module and appropriate permissions
 
 param(
-    [string]$OutputPath = ".\data"
+    [string]$OutputPath = ".\data",
+    [switch]$UseDeviceCode,
+    [switch]$Verbose
 )
 
-# Check for Microsoft Graph module
-if (-not (Get-Module -ListAvailable -Name Microsoft.Graph)) {
-    Write-Error "Microsoft Graph PowerShell module not found."
-    Write-Host "Install with: Install-Module Microsoft.Graph -Scope CurrentUser" -ForegroundColor Yellow
-    exit 1
-}
+$ErrorActionPreference = "Stop"
 
-# Create output directory
-New-Item -ItemType Directory -Path $OutputPath -Force | Out-Null
+# Force TLS 1.2 for older PowerShell versions
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 Write-Host "`n=== Azure AD Security Assessment Data Export ===" -ForegroundColor Cyan
 Write-Host "Output: $OutputPath`n" -ForegroundColor Yellow
 
-# Connect to Microsoft Graph
-Write-Host "[1/6] Connecting to Microsoft Graph..." -ForegroundColor Green
-try {
-    Connect-MgGraph -Scopes @(
-        "User.Read.All",
-        "UserAuthenticationMethod.Read.All",
-        "Policy.Read.All",
-        "RoleManagement.Read.Directory",
-        "AuditLog.Read.All",
-        "Directory.Read.All"
-    ) -ErrorAction Stop
+# === PREREQUISITE CHECKS ===
+Write-Host "[0/6] Checking Prerequisites..." -ForegroundColor Green
 
-    Write-Host "  + Connected successfully" -ForegroundColor Green
-} catch {
-    Write-Error "Failed to connect to Microsoft Graph: $_"
-    exit 1
+# Check for Microsoft Graph module
+$graphModules = @(
+    "Microsoft.Graph.Authentication",
+    "Microsoft.Graph.Users",
+    "Microsoft.Graph.Identity.DirectoryManagement",
+    "Microsoft.Graph.Identity.SignIns",
+    "Microsoft.Graph.Identity.Governance"
+)
+
+$missingModules = @()
+foreach ($module in $graphModules) {
+    if (-not (Get-Module -ListAvailable -Name $module)) {
+        $missingModules += $module
+    }
+}
+
+if ($missingModules.Count -gt 0) {
+    Write-Host "  Missing required modules:" -ForegroundColor Yellow
+    foreach ($m in $missingModules) {
+        Write-Host "    - $m" -ForegroundColor Yellow
+    }
+    Write-Host "`n  Installing missing modules..." -ForegroundColor Cyan
+
+    try {
+        # Install the main Microsoft.Graph module which includes all sub-modules
+        Install-Module Microsoft.Graph -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+        Write-Host "  + Modules installed successfully" -ForegroundColor Green
+    } catch {
+        Write-Error "Failed to install Microsoft Graph modules: $_"
+        Write-Host "`n  Manual fix: Run this command as Administrator:" -ForegroundColor Yellow
+        Write-Host "    Install-Module Microsoft.Graph -Scope AllUsers -Force -AllowClobber" -ForegroundColor Cyan
+        exit 1
+    }
+}
+
+Write-Host "  + Microsoft Graph modules available" -ForegroundColor Green
+
+# Import required modules
+Write-Host "  Importing modules..." -ForegroundColor Gray
+foreach ($module in $graphModules) {
+    try {
+        Import-Module $module -ErrorAction Stop
+    } catch {
+        Write-Warning "  Could not import $module - some features may not work"
+    }
+}
+Write-Host "  + Modules imported" -ForegroundColor Green
+
+# Create output directory
+New-Item -ItemType Directory -Path $OutputPath -Force | Out-Null
+
+# Define required scopes
+$requiredScopes = @(
+    "User.Read.All",
+    "UserAuthenticationMethod.Read.All",
+    "Policy.Read.All",
+    "RoleManagement.Read.Directory",
+    "AuditLog.Read.All",
+    "Directory.Read.All"
+)
+
+# Connect to Microsoft Graph
+Write-Host "`n[1/6] Connecting to Microsoft Graph..." -ForegroundColor Green
+Write-Host "  Required scopes: $($requiredScopes -join ', ')" -ForegroundColor Gray
+
+# Check if already connected with sufficient scopes
+$context = Get-MgContext -ErrorAction SilentlyContinue
+if ($context) {
+    $hasAllScopes = $true
+    foreach ($scope in $requiredScopes) {
+        if ($context.Scopes -notcontains $scope) {
+            $hasAllScopes = $false
+            break
+        }
+    }
+
+    if ($hasAllScopes) {
+        Write-Host "  + Already connected as $($context.Account)" -ForegroundColor Green
+    } else {
+        Write-Host "  Reconnecting with required scopes..." -ForegroundColor Yellow
+        Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
+        $context = $null
+    }
+}
+
+if (-not $context -or -not $hasAllScopes) {
+    try {
+        if ($UseDeviceCode) {
+            # Device code flow - works in environments where interactive auth fails
+            Write-Host "  Using device code authentication..." -ForegroundColor Cyan
+            Write-Host "  (A browser window will NOT open - follow the instructions below)" -ForegroundColor Yellow
+            Connect-MgGraph -Scopes $requiredScopes -UseDeviceCode -ErrorAction Stop
+        } else {
+            # Interactive authentication (default)
+            Write-Host "  Opening browser for authentication..." -ForegroundColor Cyan
+            Write-Host "  (If no browser opens, re-run with -UseDeviceCode flag)" -ForegroundColor Gray
+            Connect-MgGraph -Scopes $requiredScopes -ErrorAction Stop
+        }
+
+        $context = Get-MgContext
+        Write-Host "  + Connected successfully as $($context.Account)" -ForegroundColor Green
+        Write-Host "  + Tenant: $($context.TenantId)" -ForegroundColor Green
+    } catch {
+        Write-Host "`n  CONNECTION FAILED" -ForegroundColor Red
+        Write-Host "  Error: $_" -ForegroundColor Red
+
+        Write-Host "`n  Troubleshooting steps:" -ForegroundColor Yellow
+        Write-Host "  1. If browser didn't open, try: .\Export-AzureADData.ps1 -UseDeviceCode" -ForegroundColor Cyan
+        Write-Host "  2. Ensure you have Global Reader or higher permissions in Azure AD" -ForegroundColor Cyan
+        Write-Host "  3. Check if your organization requires admin consent for these scopes" -ForegroundColor Cyan
+        Write-Host "  4. Try running: Connect-MgGraph -Scopes 'User.Read.All' manually to test" -ForegroundColor Cyan
+        Write-Host "  5. If behind a proxy, configure: `$env:HTTPS_PROXY = 'http://proxy:port'" -ForegroundColor Cyan
+
+        exit 1
+    }
 }
 
 $azureADData = @{

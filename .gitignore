@@ -2,6 +2,7 @@
 data/
 *.json
 !package.json
+!sample-data/*.json
 
 # Reports
 reports/

@@ -1,0 +1,192 @@
+{
+  "policies": [
+    {
+      "id": "policy-001",
+      "displayName": "Require MFA for All Users",
+      "state": "enabled",
+      "createdDateTime": "2024-01-15T10:00:00Z",
+      "modifiedDateTime": "2024-06-01T14:30:00Z",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeUsers": ["emergency-access-account-id"],
+          "excludeGroups": ["break-glass-group-id"]
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        },
+        "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["mfa"]
+      }
+    },
+    {
+      "id": "policy-002",
+      "displayName": "Block Legacy Authentication",
+      "state": "enabled",
+      "createdDateTime": "2024-01-15T10:30:00Z",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"]
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        },
+        "clientAppTypes": ["exchangeActiveSync", "other"]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["block"]
+      }
+    },
+    {
+      "id": "policy-003",
+      "displayName": "Require MFA for Admins",
+      "state": "enabled",
+      "createdDateTime": "2024-02-01T09:00:00Z",
+      "conditions": {
+        "users": {
+          "includeRoles": [
+            "62e90394-69f5-4237-9190-012177145e10",
+            "e8611ab8-c189-46e8-94e1-60213ab1f814",
+            "194ae4cb-b126-40b2-bd5b-6091b380977d"
+          ],
+          "excludeUsers": ["emergency-access-account-id"]
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        },
+        "clientAppTypes": ["all"]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["mfa"]
+      }
+    },
+    {
+      "id": "policy-004",
+      "displayName": "Require Compliant Device for Office 365",
+      "state": "enabledForReportingButNotEnforced",
+      "createdDateTime": "2024-03-01T11:00:00Z",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeGroups": ["device-compliance-exclusion-group"]
+        },
+        "applications": {
+          "includeApplications": ["Office365"]
+        },
+        "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["compliantDevice", "domainJoinedDevice"]
+      }
+    },
+    {
+      "id": "policy-005",
+      "displayName": "Block Access from Untrusted Locations - Admins",
+      "state": "disabled",
+      "createdDateTime": "2024-04-01T08:00:00Z",
+      "conditions": {
+        "users": {
+          "includeRoles": ["62e90394-69f5-4237-9190-012177145e10"]
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        },
+        "locations": {
+          "includeLocations": ["All"],
+          "excludeLocations": ["AllTrusted"]
+        }
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["block"]
+      }
+    },
+    {
+      "id": "policy-006",
+      "displayName": "Require MFA for Azure Management",
+      "state": "enabled",
+      "createdDateTime": "2024-01-20T15:00:00Z",
+      "conditions": {
+        "users": {
+          "includeUsers": ["All"],
+          "excludeUsers": ["emergency-access-account-id"]
+        },
+        "applications": {
+          "includeApplications": ["797f4846-ba00-4fd7-ba43-dac1f8f63013"]
+        },
+        "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["mfa"]
+      }
+    },
+    {
+      "id": "policy-007",
+      "displayName": "Guest User MFA",
+      "state": "enabled",
+      "createdDateTime": "2024-05-01T10:00:00Z",
+      "conditions": {
+        "users": {
+          "includeGuestsOrExternalUsers": {
+            "guestOrExternalUserTypes": "b2bCollaborationGuest",
+            "externalTenants": {
+              "membershipKind": "all"
+            }
+          }
+        },
+        "applications": {
+          "includeApplications": ["All"]
+        },
+        "clientAppTypes": ["browser", "mobileAppsAndDesktopClients"]
+      },
+      "grantControls": {
+        "operator": "OR",
+        "builtInControls": ["mfa"]
+      }
+    }
+  ],
+  "namedLocations": [
+    {
+      "id": "loc-001",
+      "displayName": "Corporate HQ",
+      "@odata.type": "#microsoft.graph.ipNamedLocation",
+      "isTrusted": true,
+      "ipRanges": [
+        {
+          "@odata.type": "#microsoft.graph.iPv4CidrRange",
+          "cidrAddress": "203.0.113.0/24"
+        }
+      ]
+    },
+    {
+      "id": "loc-002",
+      "displayName": "VPN Gateway",
+      "@odata.type": "#microsoft.graph.ipNamedLocation",
+      "isTrusted": true,
+      "ipRanges": [
+        {
+          "@odata.type": "#microsoft.graph.iPv4CidrRange",
+          "cidrAddress": "198.51.100.0/24"
+        }
+      ]
+    },
+    {
+      "id": "loc-003",
+      "displayName": "Blocked Countries",
+      "@odata.type": "#microsoft.graph.countryNamedLocation",
+      "countriesAndRegions": ["KP", "IR", "RU"],
+      "includeUnknownCountriesAndRegions": false
+    }
+  ],
+  "emergencyAccounts": [
+    "emergency-access-account-id",
+    "break-glass-group-id"
+  ]
+}

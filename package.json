@@ -1,23 +1,37 @@
 {
-  "name": "ad-security-assessment-tool",
-  "version": "2.0.0",
-  "description": "Comprehensive AD/Azure AD security assessment tool for Windows 11",
+  "name": "azure-ca-policy-analyzer",
+  "version": "1.0.0",
+  "description": "Analyze Azure Conditional Access policies for security gaps and misconfigurations",
   "author": "sgordon510",
   "license": "MIT",
   "type": "module",
+  "main": "src/index.ts",
+  "bin": {
+    "ca-analyzer": "src/index.ts"
+  },
   "scripts": {
-    "assess": "bun run Tools/RunFullAssessment.ts",
-    "assess:ad": "bun run Tools/AssessADMisconfigs.ts",
-    "assess:privileges": "bun run Tools/AnalyzePrivileges.ts",
-    "assess:azure": "bun run Tools/AuditAzureAD.ts",
-    "parse:bloodhound": "bun run Tools/ParseBloodHound.ts",
-    "parse:pingcastle": "bun run Tools/ParsePingCastle.ts",
-    "report": "bun run Tools/GenerateExecutiveReport.ts"
+    "start": "bun run src/index.ts",
+    "analyze": "bun run src/index.ts",
+    "analyze:live": "bun run src/index.ts --live",
+    "test": "bun test"
   },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "keywords": [
+    "azure",
+    "conditional-access",
+    "security",
+    "entra",
+    "mfa",
+    "identity",
+    "microsoft-graph"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sgordon510/azure-ca-policy-analyzer"
   }
 }
